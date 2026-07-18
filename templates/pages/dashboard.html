@@ -5,51 +5,66 @@
 {% block content %}
 <div class="container py-4">
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center mb-5">
         <div>
-            <h2 class="fw-bold">Financial Dashboard</h2>
-            <p class="text-muted mb-0">Monitor your income, expenses and overall financial health.</p>
+            <span class="text-primary fw-semibold text-uppercase small">Dashboard</span>
+            <h1 class="fw-bold mb-2">Welcome Back</h1>
+            <p class="text-secondary mb-0">Here's an overview of your financial activity.</p>
         </div>
-
-        <a href="{{ url_for('expenses.add_expense') }}" class="btn btn-success">
-            <i class="bi bi-plus-circle"></i>
-            Add Transaction
+        <a href="{{ url_for('expenses.add_expense') }}" class="btn btn-primary rounded-pill px-4 py-2">
+            <i class="bi bi-plus-circle me-2"></i>New Transaction
         </a>
     </div>
 
     <div class="row g-4 mb-4">
         <div class="col-md-6 col-xl-3">
-            <div class="card shadow-sm border-0 h-100">
+            <div class="card shadow-sm border-0 h-100 stat-card">
                 <div class="card-body">
-                    <h6 class="text-muted">Total Balance</h6>
-                    <h3 class="fw-bold text-primary">₹{{ "%.2f"|format(total_balance|float) }}</h3>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <small class="text-secondary">Current Balance</small>
+                        <i class="bi bi-wallet2 text-primary fs-4"></i>
+                    </div>
+                    <h2 class="fw-bold text-primary mt-3">₹{{ total_balance|default('0.00') }}</h2>
+                    <small class="text-muted">Available Funds</small>
                 </div>
             </div>
         </div>
 
         <div class="col-md-6 col-xl-3">
-            <div class="card shadow-sm border-0 h-100">
+            <div class="card shadow-sm border-0 h-100 stat-card">
                 <div class="card-body">
-                    <h6 class="text-muted">Total Income</h6>
-                    <h3 class="fw-bold text-success">₹{{ "%.2f"|format(total_income|float) }}</h3>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <small class="text-secondary">Total Income</small>
+                        <i class="bi bi-arrow-down-circle text-success fs-4"></i>
+                    </div>
+                    <h2 class="fw-bold text-success mt-3">₹{{ total_income|default('0.00') }}</h2>
+                    <small class="text-muted">All income recorded</small>
                 </div>
             </div>
         </div>
 
         <div class="col-md-6 col-xl-3">
-            <div class="card shadow-sm border-0 h-100">
+            <div class="card shadow-sm border-0 h-100 stat-card">
                 <div class="card-body">
-                    <h6 class="text-muted">Total Expense</h6>
-                    <h3 class="fw-bold text-danger">₹{{ "%.2f"|format(total_expense|float) }}</h3>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <small class="text-secondary">Total Expense</small>
+                        <i class="bi bi-arrow-up-circle text-danger fs-4"></i>
+                    </div>
+                    <h2 class="fw-bold text-danger mt-3">₹{{ total_expense|default('0.00') }}</h2>
+                    <small class="text-muted">Overall spending</small>
                 </div>
             </div>
         </div>
 
         <div class="col-md-6 col-xl-3">
-            <div class="card shadow-sm border-0 h-100">
+            <div class="card shadow-sm border-0 h-100 stat-card">
                 <div class="card-body">
-                    <h6 class="text-muted">Transactions</h6>
-                    <h3 class="fw-bold">{{ transaction_count|default(0) }}</h3>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <small class="text-secondary">Transactions</small>
+                        <i class="bi bi-receipt text-primary fs-4"></i>
+                    </div>
+                    <h2 class="fw-bold mt-3">{{ transaction_count|default(0) }}</h2>
+                    <small class="text-muted">Recorded entries</small>
                 </div>
             </div>
         </div>
@@ -85,74 +100,68 @@
         </div>
     </div>
     <div class="row g-4 mt-1">
+
+    <div class="col-12">
+        <div class="card shadow-sm border-0">
+
+            <div class="card-header bg-white fw-semibold">
+                Expense by Category
+            </div>
+
+            <div class="card-body">
+
+                <canvas
+                    id="categoryChart"
+                    height="120"
+                    data-labels='{{ category_summary["labels"] | tojson }}'
+                    data-values='{{ category_summary["values"] | tojson }}'>
+                </canvas>
+
+            </div>
+
+        </div>
+      </div>
+
+    </div>
+
+    <div class="row g-4 mt-2">
         <div class="col-12">
-            <div class="card shadow-sm border-0">
-                <div class="card-header bg-white fw-semibold">
-                    Expense by Category
-                </div>
+            <h4 class="fw-bold mb-3">Financial Insights</h4>
+        </div>
+
+        <div class="col-md-6 col-xl-3">
+            <div class="card border-0 shadow-sm h-100">
                 <div class="card-body">
-                    <canvas
-                        id="categoryChart"
-                        height="120"
-                        data-labels='{{ category_summary["labels"] | tojson }}'
-                        data-values='{{ category_summary["values"] | tojson }}'>
-                    </canvas>
+                    <small class="text-secondary">Savings Rate</small>
+                    <h3 class="fw-bold text-primary mt-2">{{ financial_insights['savings_rate'] }}%</h3>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Financial Insights Section -->
-    <div class="row g-4 mt-1">
-        <div class="col-12">
-            <div class="card shadow-sm border-0">
-                <div class="card-header bg-white fw-semibold">
-                    💡 Financial Insights
-                </div>
+        <div class="col-md-6 col-xl-3">
+            <div class="card border-0 shadow-sm h-100">
                 <div class="card-body">
-                    <div class="row g-3">
-                        <div class="col-md-4">
-                            <div class="border rounded p-3 h-100">
-                                <small class="text-muted">Savings Rate</small>
-                                <h5 class="mt-2 text-success">{{ financial_insights["savings_rate"] }}%</h5>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="border rounded p-3 h-100">
-                                <small class="text-muted">Highest Expense Category</small>
-                                <h5 class="mt-2">{{ financial_insights["highest_category"] }}</h5>
-                                <div class="text-danger">₹{{ "%.2f"|format(financial_insights["highest_category_amount"]|float) }}</div>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="border rounded p-3 h-100">
-                                <small class="text-muted">Most Used Payment Method</small>
-                                <h5 class="mt-2">{{ financial_insights["most_used_payment_method"] }}</h5>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="border rounded p-3 h-100">
-                                <small class="text-muted">Largest Expense</small>
-                                {% if financial_insights["largest_expense"] %}
-                                <h6 class="mt-2 mb-1">{{ financial_insights["largest_expense"].category }}</h6>
-                                <div class="text-danger fw-semibold">₹{{ "%.2f"|format(financial_insights["largest_expense"].amount|float) }}</div>
-                                {% else %}
-                                <span class="text-muted">No expense data</span>
-                                {% endif %}
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="border rounded p-3 h-100">
-                                <small class="text-muted">Largest Income</small>
-                                {% if financial_insights["largest_income"] %}
-                                <h6 class="mt-2 mb-1">{{ financial_insights["largest_income"].category }}</h6>
-                                <div class="text-success fw-semibold">₹{{ "%.2f"|format(financial_insights["largest_income"].amount|float) }}</div>
-                                {% else %}
-                                <span class="text-muted">No income data</span>
-                                {% endif %}
-                            </div>
-                        </div>
-                    </div>
+                    <small class="text-secondary">Highest Expense</small>
+                    <h5 class="fw-bold mt-2">{{ financial_insights['highest_category'] }}</h5>
+                    <div class="text-danger fw-semibold">₹{{ "%.2f"|format(financial_insights['highest_category_amount']|float) }}</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-xl-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <small class="text-secondary">Most Used Payment</small>
+                    <h5 class="fw-bold mt-2">{{ financial_insights['most_used_payment_method'] }}</h5>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-xl-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <small class="text-secondary">Transactions</small>
+                    <h3 class="fw-bold text-primary mt-2">{{ transaction_count|default(0) }}</h3>
                 </div>
             </div>
         </div>
@@ -241,7 +250,7 @@
 
     <div class="text-center py-5">
 
-        <i class="bi bi-wallet2 display-4 text-secondary"></i>
+        <i class="bi bi-inbox display-4 text-secondary"></i>
 
         <h5 class="mt-3">
             No Transactions Yet
@@ -252,7 +261,7 @@
         </p>
 
         <a href="{{ url_for('expenses.add_expense') }}"
-           class="btn btn-success">
+           class="btn btn-primary">
 
             Add Transaction
 
@@ -275,29 +284,20 @@ const incomeCanvas = document.getElementById('incomeExpenseChart');
 if (incomeCanvas) {
     const income = Number(incomeCanvas.dataset.income || 0);
     const expense = Number(incomeCanvas.dataset.expense || 0);
-
     new Chart(incomeCanvas, {
         type: 'doughnut',
         data: {
             labels: ['Income', 'Expense'],
             datasets: [{
                 data: [income, expense],
-                backgroundColor: [
-                    '#198754',
-                    '#dc3545'
-                ],
-                borderWidth: 0,
-                hoverOffset: 8
+                backgroundColor: ['#2563EB', '#93C5FD'],
+                borderWidth: 0
             }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    position: 'bottom'
-                }
-            }
+            plugins: { legend: { position: 'bottom' } }
         }
     });
 }
@@ -316,7 +316,9 @@ if (monthlyCanvas) {
                 data: monthlyValues,
                 borderWidth: 2,
                 tension: 0.4,
-                fill: false
+                fill: true,
+                borderColor: '#2563EB',
+                backgroundColor: 'rgba(37,99,235,.15)'
             }]
         },
         options: {
@@ -330,68 +332,27 @@ if (monthlyCanvas) {
         }
     });
 }
-const categoryCanvas = document.getElementById("categoryChart");
 
+const categoryCanvas = document.getElementById('categoryChart');
 if (categoryCanvas) {
-
-    const categoryLabels =
-        JSON.parse(categoryCanvas.dataset.labels || "[]");
-
-    const categoryValues =
-        JSON.parse(categoryCanvas.dataset.values || "[]");
-
+    const labels = JSON.parse(categoryCanvas.dataset.labels || '[]');
+    const values = JSON.parse(categoryCanvas.dataset.values || '[]');
     new Chart(categoryCanvas, {
-
-        type: "bar",
-
+        type: 'bar',
         data: {
-
-            labels: categoryLabels,
-
+            labels,
             datasets: [{
-
-                label: "Expenses",
-
-                data: categoryValues,
-
-                backgroundColor: '#0d6efd',
-
-                borderWidth: 1
-
+                data: values,
+                backgroundColor: ['#2563EB','#3B82F6','#60A5FA','#93C5FD','#BFDBFE']
             }]
-
         },
-
         options: {
-
             responsive: true,
-
             maintainAspectRatio: false,
-
-            plugins: {
-
-                legend: {
-
-                    display: false
-
-                }
-
-            },
-
-            scales: {
-
-                y: {
-
-                    beginAtZero: true
-
-                }
-
-            }
-
+            plugins: { legend: { display: false } },
+            scales: { y: { beginAtZero: true } }
         }
-
     });
-
 }
 </script>
 {% endblock %}

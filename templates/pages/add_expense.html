@@ -14,7 +14,7 @@
 
             <div class="card shadow border-0">
 
-                <div class="card-header bg-success text-white">
+                <div class="card-header bg-primary text-white">
                     <h3 class="mb-0">
                         <i class="bi bi-plus-circle"></i>
                         {{ 'Edit Transaction' if edit_mode|default(false) else 'Add Transaction' }}
@@ -111,6 +111,7 @@
                             <input
                                 type="number"
                                 class="form-control"
+                                id="amount"
                                 name="amount"
                                 min="0.01"
                                 step="0.01"
@@ -118,6 +119,12 @@
                                 value="{{ expense.amount if edit_mode|default(false) else '' }}"
                                 required>
 
+                        </div>
+
+                        <div id="expensePreview" class="alert alert-info d-none mt-3">
+                            <strong>After this transaction</strong>
+                            <div class="mt-2">Remaining Budget: <span id="remainingAfter">—</span></div>
+                            <div>Projected Usage: <span id="usageAfter">—</span></div>
                         </div>
 
                         <!-- Payment Method -->
@@ -192,6 +199,53 @@
 
         </div>
 
+        <div class="col-lg-4">
+            <div class="card shadow-sm border-0 sticky-top" style="top:90px;">
+              <div class="card-body">
+                <h5 class="fw-bold mb-4"><i class="bi bi-pie-chart-fill text-primary me-2"></i>Budget Impact</h5>
+
+                <div class="mb-3">
+                  <small class="text-muted">Monthly Budget</small>
+                  <h4 id="budgetLimit" class="fw-bold">—</h4>
+                </div>
+
+                <div class="mb-3">
+                  <small class="text-muted">Spent This Month</small>
+                  <h5 id="budgetSpent">—</h5>
+                </div>
+
+                <div class="mb-3">
+                  <small class="text-muted">Remaining Budget</small>
+                  <h5 id="budgetRemaining" class="text-success">—</h5>
+                </div>
+
+                <div class="mb-3">
+                  <small class="text-muted">Daily Average</small>
+                  <h6 id="budgetDailyAverage">—</h6>
+                </div>
+
+                <div class="mb-3">
+                  <small class="text-muted">Projected Spending</small>
+                  <h6 id="budgetProjected">—</h6>
+                </div>
+
+                <div class="mb-3">
+                  <div class="d-flex justify-content-between mb-1">
+                    <small>Budget Usage</small>
+                    <small id="budgetUsage">0%</small>
+                  </div>
+                  <div class="progress" style="height:10px;">
+                    <div id="budgetProgress" class="progress-bar progress-bar-striped progress-bar-animated bg-success" style="width:0%"></div>
+                  </div>
+                </div>
+
+                <div id="budgetAlert" class="alert alert-light border small mb-0">
+                  Select an expense category to view its budget impact.
+                </div>
+              </div>
+            </div>
+        </div>
+
     </div>
 
 </div>
@@ -250,6 +304,142 @@ if (isEditMode) {
     categorySelect.selectedIndex = 0;
 }
 
-typeSelect.addEventListener("change", () => loadCategories(typeSelect.value));
+typeSelect.addEventListener('change', () => {
+    loadCategories(typeSelect.value);
+    categorySelect.selectedIndex = 0;
+    resetBudgetPanel();
+});
+
+const amountInput = document.getElementById('amount');
+const preview = document.getElementById('expensePreview');
+const budgetLimit = document.getElementById('budgetLimit');
+const budgetSpent = document.getElementById('budgetSpent');
+const budgetRemaining = document.getElementById('budgetRemaining');
+const budgetUsage = document.getElementById('budgetUsage');
+const budgetProgress = document.getElementById('budgetProgress');
+const budgetAlert = document.getElementById('budgetAlert');
+const remainingAfter = document.getElementById('remainingAfter');
+const usageAfter = document.getElementById('usageAfter');
+const budgetDailyAverage = document.getElementById('budgetDailyAverage');
+const budgetProjected = document.getElementById('budgetProjected');
+
+
+let currentBudget = null;
+
+// Helper to reset the budget panel to default state
+function resetBudgetPanel(message = 'Select an expense category to view its budget impact.') {
+    preview.classList.add('d-none');
+    currentBudget = null;
+    budgetLimit.textContent = '—';
+    budgetSpent.textContent = '—';
+    budgetRemaining.textContent = '—';
+    budgetUsage.textContent = '0%';
+    budgetProgress.style.width = '0%';
+    budgetProgress.className = 'progress-bar progress-bar-striped progress-bar-animated bg-success';
+    budgetAlert.className = 'alert alert-light border small mb-0';
+    budgetAlert.textContent = message;
+    remainingAfter.textContent = '—';
+    usageAfter.textContent = '—';
+    budgetDailyAverage.textContent = '—';
+    budgetProjected.textContent = '—';
+}
+
+async function loadBudgetImpact(category) {
+    if (typeSelect.value !== 'Expense') {
+        resetBudgetPanel();
+        return;
+    }
+    if (!category) {
+        resetBudgetPanel();
+        return;
+    }
+    try {
+        const response = await fetch(`/api/budget/${encodeURIComponent(category)}`);
+        if (!response.ok) {
+            resetBudgetPanel();
+            return;
+        }
+        currentBudget = await response.json();
+
+        budgetLimit.textContent = currentBudget.monthly_budget !== null ? `₹${currentBudget.monthly_budget.toFixed(2)}` : '—';
+        budgetSpent.textContent = currentBudget.spent !== null ? `₹${currentBudget.spent.toFixed(2)}` : '—';
+        budgetRemaining.textContent = currentBudget.remaining !== null ? `₹${currentBudget.remaining.toFixed(2)}` : '—';
+        budgetDailyAverage.textContent = currentBudget.daily_average !== undefined && currentBudget.daily_average !== null ? `₹${currentBudget.daily_average.toFixed(2)}` : '—';
+        budgetProjected.textContent = currentBudget.projected_spending !== undefined && currentBudget.projected_spending !== null ? `₹${currentBudget.projected_spending.toFixed(2)}` : '—';
+
+        const usagePercent = currentBudget.usage_percent !== null ? currentBudget.usage_percent : 0;
+        budgetUsage.textContent = usagePercent.toFixed(0) + '%';
+        budgetProgress.style.width = usagePercent.toFixed(0) + '%';
+
+        if (usagePercent <= 75) {
+            budgetProgress.className = 'progress-bar progress-bar-striped progress-bar-animated bg-success';
+            budgetAlert.className = 'alert alert-light border small mb-0';
+            budgetAlert.textContent = currentBudget.status || 'Budget is within safe limits.';
+        } else if (usagePercent <= 100) {
+            budgetProgress.className = 'progress-bar progress-bar-striped progress-bar-animated bg-warning';
+            budgetAlert.className = 'alert alert-warning border small mb-0';
+            budgetAlert.textContent = currentBudget.status || 'Budget usage is high.';
+        } else {
+            budgetProgress.className = 'progress-bar progress-bar-striped progress-bar-animated bg-danger';
+            budgetAlert.className = 'alert alert-danger border small mb-0';
+            budgetAlert.textContent = currentBudget.status || 'This transaction will exceed your budget.';
+        }
+
+        updatePreview();
+    } catch (error) {
+        resetBudgetPanel();
+    }
+}
+
+function updatePreview() {
+    if (!currentBudget) return;
+
+    const amountValue = parseFloat(amountInput.value);
+    if (isNaN(amountValue) || amountValue <= 0) {
+        preview.classList.add('d-none');
+        remainingAfter.textContent = '—';
+        usageAfter.textContent = '—';
+        return;
+    }
+
+    const projectedSpent = (currentBudget.spent || 0) + amountValue;
+    const projectedRemaining = currentBudget.monthly_budget !== null ? currentBudget.monthly_budget - projectedSpent : null;
+    const projectedUsage = (currentBudget.monthly_budget && currentBudget.monthly_budget > 0) ? (projectedSpent / currentBudget.monthly_budget) * 100 : 0;
+
+    preview.classList.remove('d-none');
+    remainingAfter.textContent = projectedRemaining !== null ? `₹${projectedRemaining.toFixed(2)}` : '—';
+    usageAfter.textContent = projectedUsage.toFixed(0) + '%';
+
+    // Clamp progress bar only
+    budgetProgress.style.width = `${Math.min(projectedUsage, 100)}%`;
+
+    // Contextual alert logic
+    if (projectedUsage <= 75) {
+        budgetAlert.className = 'alert alert-success border small mb-0';
+        budgetAlert.textContent = "This transaction keeps you comfortably within your monthly budget.";
+    } else if (projectedUsage <= 100) {
+        budgetAlert.className = 'alert alert-warning border small mb-0';
+        if (projectedRemaining !== null) {
+            budgetAlert.textContent = `Only ₹${projectedRemaining.toFixed(2)} will remain after this transaction.`;
+        } else {
+            budgetAlert.textContent = "Budget usage is high.";
+        }
+    } else {
+        budgetAlert.className = 'alert alert-danger border small mb-0';
+        if (projectedRemaining !== null) {
+            const exceeded = Math.abs(projectedRemaining);
+            budgetAlert.textContent = `This transaction exceeds your budget by ₹${exceeded.toFixed(2)}.`;
+        } else {
+            budgetAlert.textContent = "This transaction exceeds your budget.";
+        }
+    }
+}
+
+categorySelect.addEventListener('change', () => loadBudgetImpact(categorySelect.value));
+amountInput.addEventListener('input', updatePreview);
+
+if (isEditMode && selectedCategory) {
+    loadBudgetImpact(selectedCategory);
+}
 </script>
 {% endblock %}

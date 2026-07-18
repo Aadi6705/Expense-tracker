@@ -20,12 +20,12 @@
     {% block styles %}{% endblock %}
 </head>
 
-<body class="bg-light">
+<body class="bg-light d-flex flex-column min-vh-100 overflow-x-hidden">
 
     <!-- Navbar -->
     {% include 'components/navbar.html' %}
 
-    <main class="container py-4">
+    <main class="container-fluid px-4 py-4 flex-grow-1">
 
         <!-- Flash Messages -->
         {% with messages = get_flashed_messages(with_categories=true) %}
@@ -47,8 +47,23 @@
 
     </main>
 
+    <footer class="bg-dark text-light py-3 mt-auto border-top">
+        <div class="container-fluid px-4 d-flex justify-content-between align-items-center flex-wrap">
+            <span class="small">© 2026 Expense Tracker</span>
+            <span class="small text-secondary">Manage your finances smarter.</span>
+        </div>
+    </footer>
+
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+    document.addEventListener('hidden.bs.modal', function () {
+        if (document.activeElement instanceof HTMLElement) {
+            document.activeElement.blur();
+        }
+    });
+    </script>
 
     <!-- Custom JS -->
     <script src="{{ url_for('static', filename='js/script.js') }}"></script>

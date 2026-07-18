@@ -19,6 +19,7 @@ def list_expenses():
     end_date = request.args.get("end_date", "")
     sort = request.args.get("sort", "newest")
 
+    # Filtering
     query = Expense.query
 
     if search:
@@ -55,6 +56,7 @@ def list_expenses():
         except ValueError:
             flash("Invalid end date.", "warning")
 
+    # Sorting
     if sort == "oldest":
         query = query.order_by(Expense.date.asc())
     elif sort == "highest":
@@ -66,9 +68,15 @@ def list_expenses():
 
     expenses = query.all()
 
+    # Summary calculations
+    total_income = sum(float(e.amount) for e in expenses if e.transaction_type == "Income")
+    total_expense = sum(float(e.amount) for e in expenses if e.transaction_type == "Expense")
+    net_balance = total_income - total_expense
+
     categories = [c[0] for c in db.session.query(Expense.category).distinct().order_by(Expense.category).all()]
     payment_methods = [p[0] for p in db.session.query(Expense.payment_method).distinct().order_by(Expense.payment_method).all()]
 
+    # Template rendering
     return render_template(
         "pages/history.html",
         expenses=expenses,
@@ -83,6 +91,12 @@ def list_expenses():
             "end_date": end_date,
             "sort": sort,
         },
+        summary={
+            "total_income": total_income,
+            "total_expense": total_expense,
+            "net_balance": net_balance,
+            "transaction_count": len(expenses),
+        },
     )
 
 
@@ -93,26 +107,19 @@ def add_expense():
             amount = float(request.form["amount"])
             if amount <= 0:
                 flash("Amount must be greater than zero.", "warning")
-                return render_template(
-    "pages/add_expense.html",
-    edit_mode=False
-)
+                return render_template("pages/add_expense.html", edit_mode=False)
 
             transaction_type = request.form["transaction_type"].strip()
             if transaction_type not in ["Income", "Expense"]:
                 flash("Please select a valid transaction type.", "warning")
-                return render_template(
-    "pages/add_expense.html",
-    edit_mode=False
-)
+                return render_template("pages/add_expense.html", edit_mode=False)
 
             category = request.form["category"].strip()
             if not category:
                 flash("Please select a category.", "warning")
-                return render_template(
-    "pages/add_expense.html",
-    edit_mode=False
-)
+                return render_template("pages/add_expense.html", edit_mode=False)
+
+            payment_method = request.form["payment_method"].strip()
 
             expense = Expense(
                 transaction_type=transaction_type,
@@ -120,7 +127,7 @@ def add_expense():
                 category=category,
                 description=request.form.get("description", "").strip(),
                 amount=amount,
-                payment_method=request.form["payment_method"],
+                payment_method=payment_method,
                 notes=request.form.get("notes", "").strip(),
             )
 
@@ -137,10 +144,7 @@ def add_expense():
         except ValueError:
             flash("Please enter a valid amount and date.", "warning")
 
-    return render_template(
-    "pages/add_expense.html",
-    edit_mode=False
-)
+    return render_template("pages/add_expense.html", edit_mode=False)
 
 
 # Edit expense route
@@ -155,12 +159,17 @@ def edit_expense(expense_id):
                 flash("Amount must be greater than zero.", "warning")
                 return render_template("pages/add_expense.html", expense=expense, edit_mode=True)
 
-            expense.transaction_type = request.form["transaction_type"].strip()
+            transaction_type = request.form["transaction_type"].strip()
+            if transaction_type not in ["Income", "Expense"]:
+                flash("Please select a valid transaction type.", "warning")
+                return render_template("pages/add_expense.html", expense=expense, edit_mode=True)
+
+            expense.transaction_type = transaction_type
             expense.date = datetime.strptime(request.form["date"], "%Y-%m-%d").date()
             expense.category = request.form["category"].strip()
             expense.description = request.form.get("description", "").strip()
             expense.amount = amount
-            expense.payment_method = request.form["payment_method"]
+            expense.payment_method = request.form["payment_method"].strip()
             expense.notes = request.form.get("notes", "").strip()
 
             db.session.commit()

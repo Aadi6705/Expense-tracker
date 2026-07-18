@@ -1,8 +1,7 @@
-
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
-  <div class="container">
-    <a class="navbar-brand fw-bold" href="/">
-      💰 Expense Tracker
+<nav class="navbar navbar-expand-lg navbar-dark shadow-sm">
+  <div class="container-fluid px-4">
+    <a class="navbar-brand fw-bold fs-4" href="/">
+        ExpenseTracker
     </a>
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
@@ -12,21 +11,24 @@
     <div class="collapse navbar-collapse" id="navbarNav">
       <ul class="navbar-nav me-auto mb-2 mb-lg-0">
         <li class="nav-item">
-          <a class="nav-link" href="/">Home</a>
+          <a class="nav-link fw-semibold px-3" href="/">Home</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="/expenses">History</a>
+          <a class="nav-link fw-semibold px-3" href="/dashboard">Dashboard</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="/dashboard">Dashboard</a>
+          <a class="nav-link fw-semibold px-3" href="/expenses">Transactions</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="#">Analytics</a>
+          <a class="nav-link fw-semibold px-3" href="/budgets">Budgets</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link fw-semibold px-3" href="/reports">Reports</a>
         </li>
       </ul>
 
-      <a href="/expenses/add" class="btn btn-success">
-        + Add Expense
+      <a href="/expenses/add" class="btn btn-light text-primary fw-semibold px-4 rounded-pill border-0">
+        <i class="bi bi-plus-circle me-2"></i>New Transaction
       </a>
     </div>
   </div>

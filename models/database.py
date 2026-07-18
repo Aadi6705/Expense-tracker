@@ -7,6 +7,7 @@ db = SQLAlchemy()
 
 
 class Expense(db.Model):
+    """Stores income and expense transactions."""
     __tablename__ = "expenses"
 
     id = db.Column(db.Integer, primary_key=True)
@@ -38,7 +39,50 @@ class Expense(db.Model):
             "updated_at": self.updated_at.isoformat() if self.updated_at else None,
         }
 
+    @property
+    def is_income(self):
+        return self.transaction_type == "Income"
+
+    @property
+    def is_expense(self):
+        return self.transaction_type == "Expense"
+
     def __repr__(self):
         return (
             f"<Expense(id={self.id}, type='{self.transaction_type}', category='{self.category}', amount={self.amount})>"
+        )
+
+
+class Budget(db.Model):
+    """Stores monthly budget allocations for each category."""
+    __tablename__ = "budgets"
+
+    id = db.Column(db.Integer, primary_key=True)
+    category = db.Column(db.String(100), unique=True, nullable=False)
+    monthly_budget = db.Column(db.Numeric(12, 2), nullable=False)
+
+    created_at = db.Column(
+        db.DateTime,
+        server_default=db.func.now()
+    )
+
+    updated_at = db.Column(
+        db.DateTime,
+        server_default=db.func.now(),
+        onupdate=db.func.now()
+    )
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "category": self.category,
+            "monthly_budget": float(self.monthly_budget),
+            "created_at": self.created_at.isoformat() if self.created_at else None,
+            "updated_at": self.updated_at.isoformat() if self.updated_at else None,
+        }
+
+    def __repr__(self):
+        return (
+            f"<Budget(id={self.id}, category='{self.category}', "
+            f"monthly_budget={self.monthly_budget})>"
         )

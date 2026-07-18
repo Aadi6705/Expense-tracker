@@ -1,0 +1,349 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Budget Management | Expense Tracker{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+
+    <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center mb-5">
+        <div>
+            <span class="text-primary fw-semibold text-uppercase small">Budget Planner</span>
+            <h1 class="fw-bold mb-2">Manage Monthly Budgets</h1>
+            <p class="text-secondary mb-0">Set spending limits for each category and stay on track.</p>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <div class="col-md-3">
+            <div class="card stat-card border-0 shadow-sm h-100 text-center">
+                <div class="card-body d-flex flex-column align-items-center justify-content-center">
+                    <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center mb-3" style="width:50px; height:50px;">
+                        <i class="bi bi-grid-1x2-fill text-white fs-4"></i>
+                    </div>
+                    <small class="text-secondary">Active Categories</small>
+                    <h2 class="fw-bold mt-2">{{ summary.total_budgets }}</h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card stat-card border-0 shadow-sm h-100 text-center">
+                <div class="card-body d-flex flex-column align-items-center justify-content-center">
+                    <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center mb-3" style="width:50px; height:50px;">
+                        <i class="bi bi-piggy-bank-fill text-white fs-4"></i>
+                    </div>
+                    <small class="text-secondary">Monthly Allocation</small>
+                    <h2 class="fw-bold text-primary mt-2">
+                        ₹{{ '{:,.0f}'.format(summary.total_planned) }}
+                    </h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card stat-card border-0 shadow-sm h-100 text-center">
+                <div class="card-body d-flex flex-column align-items-center justify-content-center">
+                    <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center mb-3" style="width:50px; height:50px;">
+                        <i class="bi bi-wallet2 text-white fs-4"></i>
+                    </div>
+                    <small class="text-secondary">Current Month Spending</small>
+                    <h5 class="fw-bold text-success mt-2">₹{{ '{:,.0f}'.format(summary.total_spent) }}</h5>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card stat-card border-0 shadow-sm h-100 text-center">
+                <div class="card-body d-flex flex-column align-items-center justify-content-center">
+                    <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center mb-3" style="width:50px; height:50px;">
+                        <i class="bi bi-speedometer2 text-white fs-4"></i>
+                    </div>
+                    <small class="text-secondary">Overall Usage</small>
+                    <h5 class="fw-bold text-primary mt-2">{{ summary.overall_usage }}%</h5>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Phase 3: Additional Summary Cards -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-4">
+            <div class="card stat-card border-0 shadow-sm h-100 text-center">
+                <div class="card-body d-flex flex-column align-items-center justify-content-center">
+                    <div class="bg-success rounded-circle d-flex align-items-center justify-content-center mb-3" style="width:50px; height:50px;">
+                        <i class="bi bi-check-circle-fill text-white fs-4"></i>
+                    </div>
+                    <small class="text-secondary">Healthy Categories</small>
+                    <h2 class="fw-bold mt-2">{{ summary.healthy_categories }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card stat-card border-0 shadow-sm h-100 text-center">
+                <div class="card-body d-flex flex-column align-items-center justify-content-center">
+                    <div class="bg-danger rounded-circle d-flex align-items-center justify-content-center mb-3" style="width:50px; height:50px;">
+                        <i class="bi bi-exclamation-triangle-fill text-white fs-4"></i>
+                    </div>
+                    <small class="text-secondary">Over Budget</small>
+                    <h2 class="fw-bold mt-2">{{ summary.over_budget_categories }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card stat-card border-0 shadow-sm h-100 text-center">
+                <div class="card-body d-flex flex-column align-items-center justify-content-center">
+                    <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center mb-3" style="width:50px; height:50px;">
+                        <i class="bi bi-wallet2 text-white fs-4"></i>
+                    </div>
+                    <small class="text-secondary">Remaining Budget</small>
+                    <h2 class="fw-bold mt-2">₹{{ '{:,.0f}'.format(summary.total_remaining) }}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-body">
+            <div class="d-flex align-items-center mb-4">
+                <div class="bg-primary d-flex align-items-center justify-content-center rounded-circle me-3" style="width:48px; height:48px;">
+                    <i class="bi bi-wallet2 text-white fs-4"></i>
+                </div>
+                <div>
+                    <h5 class="fw-bold mb-0">Create Budget</h5>
+                    <div class="text-secondary small">Set a monthly spending limit for a spending category.</div>
+                </div>
+            </div>
+            <form method="POST" action="{{ url_for('budget.add_budget') }}">
+                <div class="row g-4 align-items-center">
+                    <div class="col-lg-4">
+                        <div class="form-floating">
+                            <input type="text" name="category" class="form-control shadow-sm rounded-3" id="categoryInput" placeholder="e.g. Food" required>
+                            <label for="categoryInput">Category</label>
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="form-floating">
+                            <input type="number" step="50" min="0" inputmode="numeric" name="monthly_budget" class="form-control shadow-sm rounded-3" id="monthlyBudgetInput" placeholder="10000" required>
+                            <label for="monthlyBudgetInput">Monthly Budget (₹)</label>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 d-flex align-items-center">
+                        <button type="submit" class="btn btn-primary w-100 py-3 fw-semibold rounded-3">
+                            <i class="bi bi-plus-circle me-2"></i>Create Budget
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-0">
+            <div class="p-4 border-bottom">
+                <h5 class="fw-semibold mb-1">Monthly Budgets</h5>
+                <p class="text-secondary small mb-0">Your configured monthly category budgets.</p>
+            </div>
+            {% if budgets %}
+<div class="row g-4 p-4">
+{% for budget in budgets %}
+    <div class="col-md-6 col-xl-4">
+        <div class="card h-100 border-0 shadow-sm stat-card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="fw-bold mb-0">{{ budget.category }}</h5>
+                    {% if budget.status == 'On Track' %}
+                        <span class="badge bg-success">On Track</span>
+                    {% elif budget.status == 'Near Limit' %}
+                        <span class="badge bg-warning text-dark">Near Limit</span>
+                    {% elif budget.status == 'Exceeded' %}
+                        <span class="badge bg-danger">Exceeded</span>
+                    {% else %}
+                        <span class="badge bg-secondary">Unknown</span>
+                    {% endif %}
+                </div>
+
+                <div class="row text-center mb-3">
+                    <div class="col">
+                        <small class="text-secondary d-block">Budget Limit</small>
+                        <span class="fw-semibold">₹{{ '{:,.0f}'.format(budget.monthly_budget|float) }}</span>
+                    </div>
+                    <div class="col">
+                        <small class="text-secondary d-block">Spent</small>
+                        <span class="fw-semibold">₹{{ '{:,.0f}'.format(budget.spent) }}</span>
+                    </div>
+                    <div class="col">
+                        <small class="text-secondary d-block">Remaining</small>
+                        <span class="fw-semibold">₹{{ '{:,.0f}'.format(budget.remaining) }}</span>
+                    </div>
+                </div>
+
+                <div class="row text-center mb-3">
+                    <div class="col">
+                        <small class="text-secondary d-block">Daily Average</small>
+                        <span class="fw-semibold">₹{{ '{:,.0f}'.format(budget.daily_average) }}</span>
+                    </div>
+                    <div class="col">
+                        <small class="text-secondary d-block">Projected Spending</small>
+                        <span class="fw-semibold">₹{{ '{:,.0f}'.format(budget.projected_spending) }}</span>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between mb-1">
+                        <small class="fw-semibold">Budget Utilization</small>
+                        <small class="fw-semibold">{{ budget.usage_percent }}%</small>
+                    </div>
+                    <div class="progress rounded-pill progress-striped progress-animated" style="height:12px;">
+                        <div
+                          class="progress-bar
+                          {% if budget.status == 'On Track' %}
+                              bg-success
+                          {% elif budget.status == 'Near Limit' %}
+                              bg-warning
+                          {% else %}
+                              bg-danger
+                          {% endif %}"
+                          role="progressbar"
+                          aria-label="Budget utilization"
+                          aria-valuenow="{{ budget.usage_percent }}"
+                          aria-valuemin="0"
+                          aria-valuemax="100"
+                          style="width: {{ [budget.usage_percent, 100]|min }}%;">
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-between mt-1">
+                        <small class="text-muted">Used</small>
+                        <small class="text-muted">Available</small>
+                    </div>
+                </div>
+
+                {% if budget.status == 'On Track' %}
+                    <div class="alert alert-success py-2 px-3 mb-3" role="alert">
+                        You're comfortably within your monthly budget.
+                    </div>
+                {% elif budget.status == 'Near Limit' %}
+                    <div class="alert alert-warning py-2 px-3 mb-3" role="alert">
+                        Monitor your spending to avoid exceeding the budget.
+                    </div>
+                {% elif budget.status == 'Exceeded' %}
+                    <div class="alert alert-danger py-2 px-3 mb-3" role="alert">
+                        Your spending has exceeded the allocated budget.
+                    </div>
+                {% endif %}
+
+                <div class="d-flex justify-content-between align-items-center border-top pt-3 mt-4">
+                    <div class="d-flex align-items-center text-muted">
+                        <i class="bi bi-calendar3 me-2"></i>
+                        <small>Current Month</small>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button
+                            type="button"
+                            class="btn btn-outline-primary rounded-pill btn-sm px-3 edit-budget-btn"
+                            data-bs-toggle="modal"
+                            data-bs-target="#editBudgetModal"
+                            data-budget-id="{{ budget.id }}"
+                            data-category="{{ budget.category }}"
+                            data-budget="{{ budget.monthly_budget }}"
+                            data-edit-url="{{ url_for('budget.edit_budget', budget_id=budget.id) }}">
+                            <i class="bi bi-pencil-square me-1"></i>Edit
+                        </button>
+                        <form method="POST"
+                              action="{{ url_for('budget.delete_budget', budget_id=budget.id) }}"
+                              class="d-inline"
+                              onsubmit="return confirm('Delete this budget?');">
+                            <button type="submit" class="btn btn-outline-danger rounded-pill btn-sm px-3">
+                                <i class="bi bi-trash me-1"></i> Delete
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endfor %}
+    </div>
+</div>
+            {% else %}
+            <div class="text-center py-5">
+                <i class="bi bi-inbox display-4 text-secondary"></i>
+                <h5 class="mt-3">No Budgets Yet</h5>
+                <p class="text-muted">Start by creating your first monthly budget.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+</div>
+
+<!-- Single Reusable Edit Budget Modal -->
+<div class="modal fade"
+     id="editBudgetModal"
+     tabindex="-1"
+     aria-labelledby="editBudgetModalLabel"
+     aria-hidden="true"
+     data-bs-backdrop="static"
+     data-bs-keyboard="false">
+  <div class="modal-dialog modal-dialog-centered modal-md modal-dialog-scrollable">
+    <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+      <form method="POST" id="editBudgetForm">
+        <div class="modal-header border-0 pb-0">
+          <h5 class="modal-title fw-semibold" id="editBudgetModalLabel">Edit Budget</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body pt-3">
+          <div class="mb-3">
+            <div class="form-floating mb-3">
+              <input type="text" name="category" class="form-control shadow-sm" id="modalCategory" readonly>
+              <label for="modalCategory">Category</label>
+            </div>
+            <div class="form-floating">
+              <input type="number" step="50" min="0" inputmode="numeric" name="monthly_budget" class="form-control shadow-sm" id="modalBudget" required>
+              <label for="modalBudget">Monthly Budget (₹)</label>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer border-0 pt-0">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary">
+            <i class="bi bi-check-circle me-1"></i>Update Budget
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+const editBudgetModal = document.getElementById('editBudgetModal');
+
+editBudgetModal.addEventListener('show.bs.modal', function (event) {
+    const button = event.relatedTarget;
+    if (!button) return;
+
+    const id = button.getAttribute('data-budget-id');
+    const category = button.getAttribute('data-category');
+    const budget = button.getAttribute('data-budget');
+
+    document.getElementById('modalCategory').value = category || '';
+    document.getElementById('modalBudget').value = budget ? Math.round(Number(budget)) : '';
+
+    // Place cursor at end of value when modal opens
+    const amountInput = document.getElementById('modalBudget');
+    requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+            amountInput.focus({ preventScroll: true });
+            const len = amountInput.value.length;
+            amountInput.setSelectionRange(len, len);
+        });
+    });
+
+    document.getElementById('editBudgetForm').action =
+        button.dataset.editUrl || `/budget/edit/${id}`;
+
+    const title = document.getElementById('editBudgetModalLabel');
+    title.textContent = `Edit ${category} Budget`;
+});
+</script>
+
+{% endblock %}

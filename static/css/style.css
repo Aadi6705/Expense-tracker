@@ -1,0 +1,177 @@
+/* =========================================
+   Expense Tracker Design System
+   ========================================= */
+
+:root {
+    /* Brand */
+    --primary: #2563EB;
+    --primary-dark: #0F4C81;
+    --primary-light: #DBEAFE;
+
+    /* Status */
+    --success: #10B981;
+    --warning: #F59E0B;
+    --danger: #EF4444;
+
+    /* Neutrals */
+    --background: #F8FAFC;
+    --surface: #FFFFFF;
+    --border: #E5E7EB;
+
+    /* Text */
+    --text: #0F172A;
+    --text-secondary: #64748B;
+
+    /* Effects */
+    --shadow-sm: 0 2px 8px rgba(15, 23, 42, .05);
+    --shadow-md: 0 10px 25px rgba(15, 23, 42, .08);
+    --radius: 16px;
+}
+
+/* =========================================
+   Global
+   ========================================= */
+
+body {
+    background: var(--background);
+    color: var(--text);
+    font-family: "Inter", "Segoe UI", sans-serif;
+}
+
+.card {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-sm);
+    transition: box-shadow .2s ease;
+    will-change: box-shadow;
+}
+
+.card:hover {
+    box-shadow: var(--shadow-md);
+}
+
+.btn-primary {
+    background: var(--primary);
+    border-color: var(--primary);
+}
+
+.btn-primary:hover {
+    background: var(--primary-dark);
+    border-color: var(--primary-dark);
+}
+
+.btn-success {
+    background: var(--success);
+    border: none;
+}
+
+.table {
+    --bs-table-bg: transparent;
+}
+
+.table thead {
+    background: #F1F5F9;
+}
+
+.table th {
+    color: var(--text);
+    font-weight: 600;
+    border-bottom: 1px solid var(--border);
+}
+
+.table td {
+    border-color: var(--border);
+}
+
+/* =========================================
+   Navbar
+   ========================================= */
+
+.navbar {
+    background: linear-gradient(
+        90deg,
+        var(--primary-dark),
+        var(--primary)
+    ) !important;
+    min-height: 72px;
+}
+
+.navbar-brand {
+    letter-spacing: .5px;
+    font-size: 1.4rem;
+    font-weight: 700;
+}
+
+.navbar .nav-link {
+    color: rgba(255,255,255,.9) !important;
+    transition: .2s;
+}
+
+.navbar .nav-link:hover,
+.navbar .nav-link.active {
+    color: var(--primary-light) !important;
+}
+
+.navbar .btn-light {
+    transition: .2s;
+}
+
+.navbar .btn-light:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 18px rgba(37,99,235,.25);
+}
+
+/* =========================================
+   Section Titles
+   ========================================= */
+
+.page-title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--text);
+}
+
+.page-subtitle {
+    color: var(--text-secondary);
+}
+
+/* =========================================
+   Utilities
+   ========================================= */
+
+.border-soft {
+    border: 1px solid var(--border);
+}
+
+.shadow-soft {
+    box-shadow: var(--shadow-sm);
+}
+.stat-card{
+    border-radius:18px;
+    border:1px solid #E5E7EB;
+    transition: box-shadow .2s ease;
+    will-change: box-shadow;
+}
+
+.stat-card:hover{
+    box-shadow:0 12px 28px rgba(37,99,235,.15);
+}
+
+.stat-card .card-body{
+    padding:1.5rem;
+}
+
+/* Prevent repaint jitter when Bootstrap modals open */
+.modal,
+.modal-backdrop,
+.modal-dialog,
+.modal-content {
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    transform: translateZ(0);
+}
+
+body.modal-open {
+    overflow-y: auto !important;
+    padding-right: 0 !important;
+}
