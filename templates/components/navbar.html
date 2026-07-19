@@ -1,6 +1,6 @@
 <nav class="navbar navbar-expand-lg navbar-dark shadow-sm">
   <div class="container-fluid px-4">
-    <a class="navbar-brand fw-bold fs-4" href="/">
+    <a class="navbar-brand fw-bold fs-4" href="{{ url_for('dashboard.dashboard') }}">
         ExpenseTracker
     </a>
 
@@ -11,23 +11,20 @@
     <div class="collapse navbar-collapse" id="navbarNav">
       <ul class="navbar-nav me-auto mb-2 mb-lg-0">
         <li class="nav-item">
-          <a class="nav-link fw-semibold px-3" href="/">Home</a>
+          <a class="nav-link fw-semibold px-3" href="{{ url_for('dashboard.dashboard') }}">Dashboard</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link fw-semibold px-3" href="/dashboard">Dashboard</a>
+          <a class="nav-link fw-semibold px-3" href="{{ url_for('expenses.list_expenses') }}">Transactions</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link fw-semibold px-3" href="/expenses">Transactions</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link fw-semibold px-3" href="/budgets">Budgets</a>
+          <a class="nav-link fw-semibold px-3" href="{{ url_for('budget.list_budgets') }}">Budgets</a>
         </li>
         <li class="nav-item">
           <a class="nav-link fw-semibold px-3" href="/reports">Reports</a>
         </li>
       </ul>
 
-      <a href="/expenses/add" class="btn btn-light text-primary fw-semibold px-4 rounded-pill border-0">
+      <a href="{{ url_for('expenses.add_expense') }}" class="btn btn-light text-primary fw-semibold px-4 rounded-pill border-0">
         <i class="bi bi-plus-circle me-2"></i>New Transaction
       </a>
     </div>

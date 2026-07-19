@@ -1,4 +1,4 @@
-from flask import Flask, render_template
+from flask import Flask, redirect, url_for
 from models.database import db
 from routes.expenses import expenses_bp
 from routes.dashboard import dashboard_bp
@@ -26,7 +26,7 @@ with app.app_context():
 
 @app.route("/")
 def home():
-    return render_template("pages/home.html")
+    return redirect(url_for("dashboard.dashboard"))
 
 
 if __name__ == "__main__":
