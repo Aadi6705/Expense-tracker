@@ -1,5 +1,10 @@
 from flask import Blueprint, render_template
-from services.analytics import get_dashboard_summary
+from services.analytics_service import (
+    get_dashboard_summary,
+    get_financial_statistics,
+    get_budget_analysis,
+    get_smart_insights,
+)
 from services.financial_intelligence import (
     generate_financial_insights,
     get_month_snapshot,
@@ -18,6 +23,9 @@ dashboard_bp = Blueprint(
 @dashboard_bp.route("/")
 def dashboard():
     summary = get_dashboard_summary()
+    financial_statistics = get_financial_statistics()
+    budget_analysis = get_budget_analysis()
+    smart_insights = get_smart_insights()
     intelligence = generate_financial_insights()
     greeting_data = get_dashboard_greeting()
     snapshot = get_month_snapshot()
@@ -45,4 +53,7 @@ def dashboard():
         snapshot=snapshot,
         category_performance=category_performance,
         spending_insights=spending_insights,
+        financial_statistics=financial_statistics,
+        budget_analysis=budget_analysis,
+        smart_insights=smart_insights,
     )

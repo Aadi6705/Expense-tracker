@@ -1,0 +1,405 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Analytics{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4 fade-in-page">
+
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+        <div>
+            <h1 class="fw-bold mb-1">Financial Analytics</h1>
+            <p class="text-muted mb-0">Analyze your financial performance with detailed insights.</p>
+        </div>
+        <span class="badge bg-primary-subtle text-primary px-3 py-2 rounded-pill">
+            Phase 5
+        </span>
+    </div>
+
+    <div class="row g-4 mb-5">
+
+        <div class="col-md-6 col-xl-3">
+            <div class="card border-0 shadow-sm dashboard-card h-100">
+                <div class="card-body">
+                    <small class="text-muted">Net Savings</small>
+                    <h3 class="fw-bold text-success mt-2">
+                        ₹{{ '{:,.0f}'.format(statistics.net_savings|float) }}
+                    </h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-xl-3">
+            <div class="card border-0 shadow-sm dashboard-card h-100">
+                <div class="card-body">
+                    <small class="text-muted">Savings Rate</small>
+                    <h3 class="fw-bold text-primary mt-2">
+                        {{ statistics.savings_rate }}%
+                    </h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-xl-3">
+            <div class="card border-0 shadow-sm dashboard-card h-100">
+                <div class="card-body">
+                    <small class="text-muted">Average Transaction</small>
+                    <h3 class="fw-bold mt-2">
+                        ₹{{ '{:,.0f}'.format(statistics.average_transaction|float) }}
+                    </h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-xl-3">
+            <div class="card border-0 shadow-sm dashboard-card h-100">
+                <div class="card-body">
+                    <small class="text-muted">Transactions</small>
+                    <h3 class="fw-bold mt-2">{{ statistics.transaction_count }}</h3>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="row g-4 mb-5">
+
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm dashboard-card h-100">
+                <div class="card-header bg-white fw-semibold">Top Spending Category</div>
+                <div class="card-body">
+                    <h3 class="fw-bold">{{ statistics.highest_category }}</h3>
+                    <p class="text-muted mb-0">
+                        ₹{{ '{:,.0f}'.format(statistics.highest_category_amount|float) }} spent
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm dashboard-card h-100">
+                <div class="card-header bg-white fw-semibold">Most Used Payment Method</div>
+                <div class="card-body">
+                    <h3 class="fw-bold">{{ statistics.most_used_payment_method }}</h3>
+                    <p class="text-muted mb-0">Based on all recorded transactions.</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="row g-4 mb-5">
+
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm dashboard-card h-100">
+                <div class="card-header bg-white fw-semibold">
+                    Income vs Expense
+                    <div class="text-muted small mt-1">Overall financial distribution</div>
+                </div>
+                <div class="card-body">
+                    <canvas
+                        id="analyticsIncomeExpenseChart"
+                        height="280"
+                        data-income="{{ total_income|default(0) }}"
+                        data-expense="{{ total_expense|default(0) }}">
+                    </canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm dashboard-card h-100">
+                <div class="card-header bg-white fw-semibold">
+                    Expense by Category
+                    <div class="text-muted small mt-1">Category-wise spending</div>
+                </div>
+                <div class="card-body">
+                    <canvas
+                        id="analyticsCategoryChart"
+                        height="280"
+                        data-labels='{{ dashboard.category_summary["labels"] | tojson }}'
+                        data-values='{{ dashboard.category_summary["values"] | tojson }}'>
+                    </canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12">
+            <div class="card border-0 shadow-sm dashboard-card">
+                <div class="card-header bg-white fw-semibold">
+                    Monthly Spending Trend
+                    <div class="text-muted small mt-1">Track expenses over time</div>
+                </div>
+                <div class="card-body">
+                    <canvas
+                        id="analyticsMonthlyChart"
+                        height="120"
+                        data-labels='{{ dashboard.monthly_summary["labels"] | tojson }}'
+                        data-values='{{ dashboard.monthly_summary["values"] | tojson }}'>
+                    </canvas>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+<div class="card border-0 shadow-sm dashboard-card mb-4">
+    <div class="card-header bg-white">
+        <h5 class="mb-1 fw-bold">Spending Behavior Analysis</h5>
+        <small class="text-muted">Key financial insights derived from your transactions.</small>
+    </div>
+
+    <div class="card-body">
+        <div class="row g-4">
+
+            <div class="col-md-6 col-xl-3">
+                <div class="border rounded-3 p-3 h-100">
+                    <small class="text-muted d-block">Largest Expense</small>
+                    <h5 class="fw-bold mt-2 mb-1">
+                        {{ spending_behavior.largest_expense.category if spending_behavior.largest_expense else 'N/A' }}
+                    </h5>
+                    <span class="text-danger fw-semibold">
+                        ₹{{ '{:,.0f}'.format(spending_behavior.largest_expense.amount|float) if spending_behavior.largest_expense else '0' }}
+                    </span>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-xl-3">
+                <div class="border rounded-3 p-3 h-100">
+                    <small class="text-muted d-block">Largest Income</small>
+                    <h5 class="fw-bold mt-2 mb-1">
+                        {{ spending_behavior.largest_income.category if spending_behavior.largest_income else 'N/A' }}
+                    </h5>
+                    <span class="text-success fw-semibold">
+                        ₹{{ '{:,.0f}'.format(spending_behavior.largest_income.amount|float) if spending_behavior.largest_income else '0' }}
+                    </span>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-xl-3">
+                <div class="border rounded-3 p-3 h-100">
+                    <small class="text-muted d-block">Average Expense</small>
+                    <h4 class="fw-bold mt-2">
+                        ₹{{ '{:,.0f}'.format(spending_behavior.average_expense|float) }}
+                    </h4>
+                    <small class="text-muted">Per expense transaction.</small>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-xl-3">
+                <div class="border rounded-3 p-3 h-100">
+                    <small class="text-muted d-block">Average per Category</small>
+                    <h4 class="fw-bold mt-2">
+                        ₹{{ '{:,.0f}'.format(spending_behavior.average_per_category|float) }}
+                    </h4>
+                    <small class="text-muted">Across expense categories.</small>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    </div>
+
+<div class="card border-0 shadow-sm dashboard-card mb-4">
+    <div class="card-header bg-white">
+        <h5 class="mb-1 fw-bold">Budget Analytics</h5>
+        <small class="text-muted">Monitor your budget utilization and spending performance.</small>
+    </div>
+
+    <div class="card-body">
+        <div class="row g-4 mb-4">
+            <div class="col-md-3">
+                <div class="border rounded-3 p-3 h-100">
+                    <small class="text-muted d-block">Total Budget</small>
+                    <h4 class="fw-bold mt-2">₹{{ '{:,.0f}'.format(budget_analysis.total_budget|float) }}</h4>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="border rounded-3 p-3 h-100">
+                    <small class="text-muted d-block">Total Spent</small>
+                    <h4 class="fw-bold text-danger mt-2">₹{{ '{:,.0f}'.format(budget_analysis.total_spent|float) }}</h4>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="border rounded-3 p-3 h-100">
+                    <small class="text-muted d-block">Remaining Budget</small>
+                    <h4 class="fw-bold text-success mt-2">₹{{ '{:,.0f}'.format(budget_analysis.remaining_budget|float) }}</h4>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="border rounded-3 p-3 h-100">
+                    <small class="text-muted d-block">Utilization</small>
+                    <h4 class="fw-bold text-primary mt-2">{{ budget_analysis.utilization_percentage }}%</h4>
+                </div>
+            </div>
+        </div>
+
+        <h6 class="fw-semibold mb-3">Category Budget Performance</h6>
+
+        {% if budget_analysis.category_analysis %}
+            {% for item in budget_analysis.category_analysis %}
+            <div class="mb-3">
+                <div class="d-flex justify-content-between mb-1">
+                    <span>{{ item.category }}</span>
+                    <span>{{ item.utilization }}%</span>
+                </div>
+                <div class="progress" style="height: 8px;">
+                    <div class="progress-bar {% if item.utilization > 100 %}bg-danger{% elif item.utilization > 80 %}bg-warning{% else %}bg-success{% endif %}"
+                         role="progressbar"
+                         style="width: {{ [item.utilization,100]|min }}%;"
+                         aria-valuenow="{{ item.utilization }}"
+                         aria-valuemin="0"
+                         aria-valuemax="100">
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="text-center py-4 text-muted">
+                No budget data available.
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm dashboard-card mb-4">
+    <div class="card-header bg-white">
+        <h5 class="mb-1 fw-bold">Smart Financial Insights</h5>
+        <small class="text-muted">Personalized insights based on your spending and budget patterns.</small>
+    </div>
+
+    <div class="card-body">
+        {% if smart_insights %}
+            <div class="row g-3">
+                {% for insight in smart_insights %}
+                <div class="col-lg-6">
+                    <div class="alert alert-{{ insight.type }} mb-0 d-flex align-items-start" role="alert">
+                        <div>
+                            <h6 class="fw-bold mb-1">{{ insight.title }}</h6>
+                            <p class="mb-0 small">{{ insight.message }}</p>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="text-center py-4 text-muted">
+                No insights available yet. Add more transactions and budgets to receive personalized recommendations.
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<hr class="my-4">
+
+<div class="text-center text-muted small">
+    FinanceFlow Analytics • Phase 5 Dashboard
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    // Income vs Expense Doughnut Chart
+    const incomeExpenseCtx = document.getElementById("analyticsIncomeExpenseChart");
+    if (incomeExpenseCtx) {
+        const income = parseFloat(incomeExpenseCtx.dataset.income) || 0;
+        const expense = parseFloat(incomeExpenseCtx.dataset.expense) || 0;
+        new Chart(incomeExpenseCtx.getContext("2d"), {
+            type: "doughnut",
+            data: {
+                labels: ["Income", "Expense"],
+                datasets: [{
+                    data: [income, expense],
+                    backgroundColor: [
+                        "#2563EB",
+                        "#DC2626"
+                    ],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                cutout: "70%",
+                plugins: {
+                    legend: { display: true, position: "bottom" },
+                    tooltip: { enabled: true }
+                }
+            }
+        });
+    }
+
+    // Expense by Category Doughnut Chart
+    const categoryCtx = document.getElementById("analyticsCategoryChart");
+    if (categoryCtx) {
+        const labels = JSON.parse(categoryCtx.dataset.labels || "[]");
+        const values = JSON.parse(categoryCtx.dataset.values || "[]");
+        new Chart(categoryCtx.getContext("2d"), {
+            type: "doughnut",
+            data: {
+                labels: labels,
+                datasets: [{
+                    data: values,
+                    backgroundColor: [
+                        "#2563EB",
+                        "#16A34A",
+                        "#F59E0B",
+                        "#0EA5E9",
+                        "#DC2626",
+                        "#6B7280",
+                        "#8B5CF6",
+                        "#EC4899"
+                    ],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                cutout: "70%",
+                plugins: {
+                    legend: { display: true, position: "bottom" },
+                    tooltip: { enabled: true }
+                }
+            }
+        });
+    }
+
+    // Monthly Spending Trend Line Chart
+    const monthlyCtx = document.getElementById("analyticsMonthlyChart");
+    if (monthlyCtx) {
+        const labels = JSON.parse(monthlyCtx.dataset.labels || "[]");
+        const values = JSON.parse(monthlyCtx.dataset.values || "[]");
+        new Chart(monthlyCtx.getContext("2d"), {
+            type: "line",
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: "Spending",
+                    data: values,
+                    fill: true,
+                    backgroundColor: "rgba(37,99,235,0.15)",
+                    borderColor: "#2563EB",
+                    borderWidth: 2,
+                    tension: 0.4,
+                    pointRadius: 3,
+                    pointBackgroundColor: "#2563EB"
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return "₹" + value.toLocaleString();
+                            }
+                        }
+                    }
+                },
+                plugins: {
+                    legend: { display: true },
+                    tooltip: { enabled: true }
+                }
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

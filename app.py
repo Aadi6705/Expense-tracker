@@ -3,13 +3,17 @@ from models.database import db
 from routes.expenses import expenses_bp
 from routes.dashboard import dashboard_bp
 from routes.budget import budget_bp
+
 from routes.api import api_bp
+from routes.analytics import analytics_bp
 
 
 app = Flask(__name__)
 app.register_blueprint(api_bp)
 app.register_blueprint(budget_bp)
 app.register_blueprint(dashboard_bp)
+
+app.register_blueprint(analytics_bp)
 
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///expense_tracker.db"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
